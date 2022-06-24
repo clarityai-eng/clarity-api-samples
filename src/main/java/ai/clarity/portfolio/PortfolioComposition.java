@@ -22,7 +22,7 @@ public class PortfolioComposition {
         this.components = components;
     }
 
-    public static PortfolioComposition build() {
+    public static PortfolioComposition create() {
         return new PortfolioComposition(new ArrayList<>());
     }
 
@@ -33,10 +33,6 @@ public class PortfolioComposition {
 
     public double getTotalWeight() {
         return getTotalWeightFor(components);
-    }
-
-    private double getTotalWeightFor(List<PortfolioComponent> componentList) {
-        return componentList.stream().mapToDouble(c -> c.weight).sum();
     }
 
     public List<PortfolioComponent> getComponents() { return components; }
@@ -55,6 +51,10 @@ public class PortfolioComposition {
         }
 
         return this;
+    }
+
+    private double getTotalWeightFor(List<PortfolioComponent> componentList) {
+        return componentList.stream().mapToDouble(c -> c.weight).sum();
     }
 
 }
