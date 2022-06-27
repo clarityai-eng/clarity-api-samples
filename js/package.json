@@ -1,0 +1,19 @@
+{
+  "name": "clarityai-api-utils",
+  "version": "1.0.0",
+  "description": "Set of convenience functions created in order to help users of the Clarity Public API",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "clarity",
+    "ai",
+    "utils"
+  ],
+  "author": "Clarity AI",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  }
+}
