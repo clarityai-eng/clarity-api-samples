@@ -37,6 +37,12 @@ public class PortfolioComposition {
 
     public List<PortfolioComponent> getComponents() { return components; }
 
+    /**
+     * Check if there are negative weights in this Portfolio Composition and in that case remove them and
+     * normalize remaining weights to 100, returning a new PortfolioComposition object
+     *
+     * @return   The new normalized PortfolioComposition
+     */
     public PortfolioComposition removeShortsAndNormalizeWeights() {
         List<PortfolioComponent> portfolioComponentsWithoutShorts = components.stream()
                 .filter(c -> c.weight > 0)
