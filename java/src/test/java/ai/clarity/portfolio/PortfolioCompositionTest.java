@@ -38,7 +38,7 @@ public class PortfolioCompositionTest {
         assertEquals(5, composition.getComponents().size());
         assertEquals(100, composition.getTotalWeight());
 
-        PortfolioComposition newComposition = composition.removeShortsAndNormalizeWeights();
+        PortfolioComposition newComposition = PortfolioComposition.removeShortsAndNormalizeWeights(composition);
 
         assertEquals(4, newComposition.getComponents().size());
         assertEquals(100, newComposition.getTotalWeight());
@@ -51,13 +51,9 @@ public class PortfolioCompositionTest {
                 .add("ISIN_3", 33)
                 .add("ISIN_4", 20);
 
-        assertEquals(4, composition.getComponents().size());
-        assertEquals(100, composition.getTotalWeight());
+        PortfolioComposition newComposition = PortfolioComposition.removeShortsAndNormalizeWeights(composition);
 
-        PortfolioComposition newComposition = composition.removeShortsAndNormalizeWeights();
-
-        assertEquals(4, newComposition.getComponents().size());
-        assertEquals(100, newComposition.getTotalWeight());
+        assertEquals(composition, newComposition);
     }
 
 }

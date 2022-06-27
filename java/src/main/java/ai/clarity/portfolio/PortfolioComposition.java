@@ -43,12 +43,12 @@ public class PortfolioComposition {
      *
      * @return   The new normalized PortfolioComposition
      */
-    public PortfolioComposition removeShortsAndNormalizeWeights() {
-        List<PortfolioComponent> portfolioComponentsWithoutShorts = components.stream()
+    public static PortfolioComposition removeShortsAndNormalizeWeights(PortfolioComposition composition) {
+        List<PortfolioComponent> portfolioComponentsWithoutShorts = composition.getComponents().stream()
                 .filter(c -> c.weight > 0)
                 .collect(Collectors.toList());
 
-        if(portfolioComponentsWithoutShorts.size() < components.size()) {
+        if(portfolioComponentsWithoutShorts.size() < composition.getComponents().size()) {
             PortfolioComposition newPortfolioComposition = PortfolioComposition.create();
             double totalWeightWithoutShorts = getTotalWeightFor(portfolioComponentsWithoutShorts);
 
@@ -59,10 +59,10 @@ public class PortfolioComposition {
             return newPortfolioComposition;
         }
 
-        return this;
+        return composition;
     }
 
-    private double getTotalWeightFor(List<PortfolioComponent> componentList) {
+    private static double getTotalWeightFor(List<PortfolioComponent> componentList) {
         return componentList.stream().mapToDouble(c -> c.weight).sum();
     }
 
