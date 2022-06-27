@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 
 public class PortfolioComposition {
 
-    private List<PortfolioComponent> components;
+    private final List<PortfolioComponent> components;
 
     private class PortfolioComponent{
-        String securityId;
-        double weight;
+        final String securityId;
+        final double weight;
 
         private PortfolioComponent(String securityId, double weight){
             this.securityId = securityId;
@@ -38,16 +38,19 @@ public class PortfolioComposition {
     public List<PortfolioComponent> getComponents() { return components; }
 
     public PortfolioComposition removeShortsAndNormalizeWeights() {
-        List<PortfolioComponent> newPortfolioComponents = components.stream()
+        List<PortfolioComponent> portfolioComponentsWithoutShorts = components.stream()
                 .filter(c -> c.weight > 0)
                 .collect(Collectors.toList());
 
-        if(newPortfolioComponents.size() < components.size()) {
-            double totalWeightWithoutShorts = getTotalWeightFor(newPortfolioComponents);
-            for(PortfolioComponent newComponent : newPortfolioComponents) {
-                newComponent.weight = newComponent.weight * 100 / totalWeightWithoutShorts;
+        if(portfolioComponentsWithoutShorts.size() < components.size()) {
+            PortfolioComposition newPortfolioComposition = PortfolioComposition.create();
+            double totalWeightWithoutShorts = getTotalWeightFor(portfolioComponentsWithoutShorts);
+
+            for(PortfolioComponent component : portfolioComponentsWithoutShorts) {
+                double newWeight = component.weight * 100 / totalWeightWithoutShorts;
+                newPortfolioComposition.add(component.securityId, newWeight);
             }
-            this.components = newPortfolioComponents;
+            return newPortfolioComposition;
         }
 
         return this;
