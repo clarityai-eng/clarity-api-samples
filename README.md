@@ -1,8 +1,8 @@
-# Clarity AI Public API Utils
+# Clarity AI API Utils
 
 ## What is this repo?
 Here you may find some tools, helpers, code snippets or examples that will help you with the most common tasks required to 
-develop code that consumes the services offered by Clarity AI through our HTTP REST Public API.
+develop code that consumes the services offered by Clarity AI through our HTTP REST API.
 
 Our intention is to share with the developers using our API a way to make their integration with our services easier, so 
 they can create code that consume our sustainability data as smoothly as possible.
@@ -13,7 +13,7 @@ importing them from Maven, npm or any other artifact repository)
 
 Instead, this is more like a collection of reusable code that you should be able of copy/paste directly without any 
 modification into your own code and start using it, in order to facilitate common work that needs to be done when using
-our Public API. It should be generic and simple enough to fit in most of the use cases.
+our API. It should be generic and simple enough to fit in most of the use cases.
 
 Every functionality should have their own Unit Tests that you can check to see an example of how to use the code after
 you integrated it in your functionality.
