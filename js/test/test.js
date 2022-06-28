@@ -2,11 +2,6 @@ const ClarityAIUtils = require('../index');
 const assert  = require('assert').strict;
 
 const portfolio_with_shorts = {
-  "deprecatedIsinFieldValues": [
-    "string"
-  ],
-  "name": "Portfolio with shorts",
-  "securitiesWeightDistribution": "PERCENTAGE",
   "securities": [
     {
       "isin": "ISIN_1",
@@ -28,19 +23,10 @@ const portfolio_with_shorts = {
       "isin": "ISIN_5",
       "percentage": 53
     }
-  ],
-  "total": {
-    "value": 0,
-    "currency": "USD"
-  }
+  ]
 }
 
 const portfolio_without_shorts = {
-  "deprecatedIsinFieldValues": [
-    "string"
-  ],
-  "name": "Portfolio with shorts",
-  "securitiesWeightDistribution": "PERCENTAGE",
   "securities": [
     {
       "isin": "ISIN_1",
@@ -58,11 +44,7 @@ const portfolio_without_shorts = {
       "isin": "ISIN_4",
       "percentage": 20
     }
-  ],
-  "total": {
-    "value": 0,
-    "currency": "USD"
-  }
+  ]
 }
 
 
