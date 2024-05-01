@@ -26,9 +26,12 @@ class AsyncDownloader:
         return self._download_job_result(job_id)
 
     def _get_token(self) -> str:
-        return self.token if self.token else self._request_new_token()
+        if not self.token:
+            self.token = self._request_new_token()
+        return self.token
 
     def _request_new_token(self) -> str:
+        logging.info(f"Requesting new token...")
         body = {
             "key": self.key,
             "secret": self.secret
@@ -104,7 +107,6 @@ class AsyncDownloader:
         return self._download_file(download_url, local_filename)
 
     def _download_file(self, download_url: str, local_filename: str, num_retry: int = 1) -> str:
-
         logging.info(f"Downloading file from {download_url} to {local_filename}.")
 
         headers = self._get_headers()
