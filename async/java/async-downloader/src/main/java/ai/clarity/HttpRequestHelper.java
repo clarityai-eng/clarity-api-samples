@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 public class HttpRequestHelper {
 
-    private static Logger logger = Logger.getLogger(HttpRequestHelper.class.getName());
+    private static final Logger logger = Logger.getLogger(HttpRequestHelper.class.getName());
 
     public static Optional<String> mapToJson(Map<String, Object> map) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -44,11 +44,7 @@ public class HttpRequestHelper {
     }
 
     public static Optional<String> getRequest(String url, Map<String, String> headers) {
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url));
-        if(headers != null) {
-            requestBuilder = addHeaders(requestBuilder, headers);
-        }
-
+        HttpRequest.Builder requestBuilder = getRequestBuilder(url, headers);
         HttpRequest request = requestBuilder
                 .GET()
                 .build();
@@ -57,11 +53,7 @@ public class HttpRequestHelper {
     }
 
     public static Optional<String> postRequest(String url, Map<String, String> headers, String jsonBody) {
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url));
-        if(headers != null) {
-            requestBuilder = addHeaders(requestBuilder, headers);
-        }
-
+        HttpRequest.Builder requestBuilder = getRequestBuilder(url, headers);
         HttpRequest request = requestBuilder
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
@@ -69,9 +61,12 @@ public class HttpRequestHelper {
         return handleResponse(request);
     }
 
-    private static HttpRequest.Builder addHeaders(HttpRequest.Builder requestBuilder, Map<String, String> headers) {
-        for(String header: headers.keySet()) {
-            requestBuilder.header(header,  headers.get(header));
+    private static HttpRequest.Builder getRequestBuilder(String url, Map<String, String> headers) {
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url));
+        if(headers != null) {
+            for(String header: headers.keySet()) {
+                requestBuilder.header(header,  headers.get(header));
+            }
         }
         return requestBuilder;
     }
@@ -85,16 +80,7 @@ public class HttpRequestHelper {
                 logger.log(Level.SEVERE, "Request finished with status Code: " + response.statusCode());
 
                 if(!response.body().isBlank()) {
-                    Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.body()).get();
-                    String errorMessage = "";
-                    if(responseMap.containsKey("message")){
-                        errorMessage = (String) responseMap.get("message");
-                    }
-                    if(responseMap.containsKey("elements")){
-                        Map errorMap = (Map) ((List) responseMap.get("elements")).get(0);
-                        errorMessage = (String) errorMap.get("message");
-                    }
-                    logger.log(Level.SEVERE, "Error requesting async job: " + errorMessage);
+                    logger.log(Level.SEVERE, "Error body: " + response.body());
                 }
 
                 return Optional.empty();

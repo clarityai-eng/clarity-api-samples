@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 public class AsyncDownloader {
 
-    private static Logger logger = Logger.getLogger(AsyncDownloader.class.getName());
+    private static final Logger logger = Logger.getLogger(AsyncDownloader.class.getName());
 
     private String token;
     private final String domain;
