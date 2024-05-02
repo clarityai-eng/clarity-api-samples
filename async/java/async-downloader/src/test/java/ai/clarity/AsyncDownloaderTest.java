@@ -1,9 +1,6 @@
 package ai.clarity;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
@@ -20,8 +17,8 @@ public class AsyncDownloaderTest {
 
     private static ClientAndServer mockServer;
 
-    @BeforeAll
-    public static void startServer() {
+    @BeforeEach
+    public void startServer() {
         mockServer = startClientAndServer(1080);
 
         // Mock requesting a token for all tests
@@ -45,8 +42,8 @@ public class AsyncDownloaderTest {
                 );
     }
 
-    @AfterAll
-    public static void stopServer() {
+    @AfterEach
+    public void stopServer() {
         mockServer.stop();
     }
 
