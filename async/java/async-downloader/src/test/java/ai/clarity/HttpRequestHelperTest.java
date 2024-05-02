@@ -1,6 +1,5 @@
 package ai.clarity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +9,7 @@ import java.util.Map;
 public class HttpRequestHelperTest {
 
     @Test
-    public void testMapToJsonAndJsonToMap() throws JsonProcessingException {
+    public void testMapToJsonAndJsonToMap() {
         Map<String, Object> map = Map.of("name", "John", "familyNames", List.of("Smith", "Johnson"));
 
         var jsonResult = HttpRequestHelper.mapToJson(map).get();
@@ -20,4 +19,16 @@ public class HttpRequestHelperTest {
         Assertions.assertEquals(map, mapFromJson);
     }
 
+    @Test
+    public void testSuccessfulGetRequest() {
+        String response = HttpRequestHelper.getRequest("https://developer.clarity.ai/").get();
+        Assertions.assertFalse(response.isEmpty());
+    }
+
+    @Test
+    public void testSuccessfulGetRequestWithHeaders() {
+        var headers = Map.of("Accept", "text/html");
+        String response = HttpRequestHelper.getRequest("https://developer.clarity.ai/", headers).get();
+        Assertions.assertFalse(response.isEmpty());
+    }
 }
