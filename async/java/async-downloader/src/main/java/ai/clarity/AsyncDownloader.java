@@ -1,6 +1,7 @@
 package ai.clarity;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,8 +28,11 @@ public class AsyncDownloader {
 
         var url = domain + "/clarity/v1/oauth/token";
         logger.log(Level.INFO, "Requesting new token to " + url);
-        var response = HttpRequestHelper.postRequest(url, headers, jsonBody).get();
-        Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response).get();
+        Optional<String> response = HttpRequestHelper.postRequest(url, headers, jsonBody);
+        if(response.isEmpty()){
+            throw new RuntimeException("Couldn't request the access token");
+        }
+        Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.get()).get();
         return (String) responseMap.get("token");
     }
 

@@ -8,7 +8,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -23,7 +22,7 @@ public class HttpRequestHelper {
         try {
             return Optional.of(objectMapper.writeValueAsString(map));
         } catch (JsonProcessingException e) {
-            logger.log(Level.SEVERE, "Couldn't covert map to JSON");
+            logger.log(Level.SEVERE, "Couldn't convert map to JSON");
             return Optional.empty();
         }
     }
@@ -34,7 +33,7 @@ public class HttpRequestHelper {
             Map<String, Object> mapFromJson = mapper.readValue(json, Map.class);
             return Optional.of(mapFromJson);
         } catch (JsonProcessingException e) {
-            logger.log(Level.SEVERE, "Couldn't covert JSON to Map");
+            logger.log(Level.SEVERE, "Couldn't convert JSON to Map");
             return Optional.empty();
         }
     }
@@ -88,6 +87,7 @@ public class HttpRequestHelper {
 
             return Optional.of(response.body());
         } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
             logger.log(Level.SEVERE, "Couldn't make the request. Error: " + e.getMessage());
             return Optional.empty();
         }
