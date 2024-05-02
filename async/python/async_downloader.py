@@ -102,7 +102,7 @@ class AsyncDownloader:
 
     def _download_job_result(self, job_id: str) -> str:
         download_url = f"{self.domain}/clarity/v1/public/job/{job_id}/fetch"
-        local_filename = f"{job_id}.gz"
+        local_filename = f"{job_id}.csv.gz"
         return self._download_file(download_url, local_filename)
 
     def _download_file(self, download_url: str, local_filename: str) -> str:
