@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -124,4 +126,22 @@ public class HttpRequestHelperTest {
         Assertions.assertTrue(response.isEmpty());
     }
 
+    @Test
+    public void testDownloadContentToFile() throws IOException {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/download")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("This is a big body")
+                );
+
+        var tmpFile = Files.createTempFile("test", ".txt");
+        HttpRequestHelper.downloadToFile("http://localhost:1080/download", null, tmpFile);
+        Assertions.assertNotNull(tmpFile);
+    }
 }

@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +60,25 @@ public class HttpRequestHelper {
                 .build();
 
         return handleResponse(request);
+    }
+
+    public static void downloadToFile(String url, Map<String, String> headers, Path path) {
+        HttpRequest.Builder requestBuilder = getRequestBuilder(url, headers);
+        HttpRequest request = requestBuilder.GET().build();
+        HttpClient httpClient = HttpClient.newHttpClient();
+        try {
+            HttpResponse response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(path));
+            if(response.statusCode() != 200) {
+                throw new RuntimeException("Error when downloading file. Status Code: " + response.statusCode());
+            }
+            else {
+                logger.log(Level.INFO, "Successfully downloaded content to file " + path);
+            }
+        } catch (IOException|InterruptedException e) {
+            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error when downloading file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     private static HttpRequest.Builder getRequestBuilder(String url, Map<String, String> headers) {
