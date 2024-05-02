@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.matchers.MatchType;
+import org.mockserver.matchers.Times;
 
 import java.util.List;
 import java.util.Map;
@@ -83,5 +84,40 @@ public class AsyncDownloaderTest {
                                             "securityTypes", List.of("EQUITY"));
         String jobId = asyncDownloader.requestAsync("/securities/module/async", params);
         Assertions.assertEquals("NEW_JOB_ID", jobId);
+    }
+
+    @Test
+    public void testWaitForJobUntilSuccess() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN"),
+                        Times.exactly(5)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(202)
+                                .withBody("{\"statusMessage\": \"RUNNING\"}")
+                );
+
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(302)
+                                .withBody("{\"statusMessage\": \"SUCCESS\"}")
+                );
+
+        AsyncDownloader asyncDownloader = new AsyncDownloader("http://localhost:1080", "MY_KEY", "MY_SECRET", 1);
+        asyncDownloader.waitForJob("MY_JOB_ID");
     }
 }

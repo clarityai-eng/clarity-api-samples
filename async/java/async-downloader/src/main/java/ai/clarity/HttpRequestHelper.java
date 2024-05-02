@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,7 +76,7 @@ public class HttpRequestHelper {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (!Set.of(200, 202, 302).contains(response.statusCode())) {
                 logger.log(Level.SEVERE, "Request finished with status Code: " + response.statusCode());
 
                 if(!response.body().isBlank()) {

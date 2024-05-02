@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 public class AsyncDownloader {
 
+    private static final short DEFAULT_WAITING_MILISECS = 30 * 1000;
     private static final Logger logger = Logger.getLogger(AsyncDownloader.class.getName());
 
     private String token;
@@ -14,10 +15,17 @@ public class AsyncDownloader {
     private final String key;
     private final String secret;
 
-    public AsyncDownloader(String domain, String key, String secret) {
+    private final int waitingTime;
+
+    public AsyncDownloader(String domain, String key, String secret, int waitingTime) {
         this.domain = domain;
         this.key = key;
         this.secret = secret;
+        this.waitingTime = waitingTime;
+    }
+
+    public AsyncDownloader(String domain, String key, String secret) {
+        this(domain, key, secret, DEFAULT_WAITING_MILISECS);
     }
 
     public String requestNewToken() {
@@ -62,6 +70,33 @@ public class AsyncDownloader {
             return jobId;
         }
 
+    }
+
+    public void waitForJob(String jobId) {
+        logger.log(Level.INFO, "Waiting for job with id " + jobId + " to finish...");
+        String status = "RUNNING";
+        while(status.equals("RUNNING")) {
+            try {
+                Thread.sleep(this.waitingTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Map<String, String> headers = getHeaders();
+            Optional<String> response = HttpRequestHelper.getRequest(getUrl("/job/" + jobId + "/status"), headers);
+            if(response.isPresent()) {
+                Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.get()).get();
+                status = (String) responseMap.get("statusMessage");
+            }
+            else {
+                throw new RuntimeException("Error requesting the status of the job " + jobId);
+            }
+        }
+
+        if(!status.equals("RUNNING") && !status.equals("SUCCESS")) {
+            throw new RuntimeException("The job " + jobId + " didn't finish correctly. Status: " + status);
+        }
+
+        logger.log(Level.INFO, "The job with id " + jobId + " finished correctly");
     }
 
     private String getToken() {
