@@ -1,5 +1,6 @@
 package ai.clarity;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -28,7 +29,13 @@ public class AsyncDownloader {
         this(domain, key, secret, DEFAULT_WAITING_MILISECS);
     }
 
-    public String requestNewToken() {
+    public String download(String apiPath, Map<String, Object> data) {
+        String jobId = requestAsync(apiPath, data);
+        waitForJob(jobId);
+        return downloadJobResult(jobId);
+    }
+
+    protected String requestNewToken() {
         Map<String, String> headers = Map.of("Content-type", "application/json");
 
         Map<String, Object> bodyParams = Map.of("key", this.key, "secret", this.secret);
@@ -44,7 +51,7 @@ public class AsyncDownloader {
         return (String) responseMap.get("token");
     }
 
-    public String requestAsync(String apiPath, Map<String, Object> data) {
+    protected String requestAsync(String apiPath, Map<String, Object> data) {
         String url = getUrl(apiPath);
         Map<String, String> headers = getHeaders();
         String jsonData = HttpRequestHelper.mapToJson(data).get();
@@ -72,7 +79,7 @@ public class AsyncDownloader {
 
     }
 
-    public void waitForJob(String jobId) {
+    protected void waitForJob(String jobId) {
         logger.log(Level.INFO, "Waiting for job with id " + jobId + " to finish...");
         String status = "RUNNING";
         while(status.equals("RUNNING")) {
@@ -82,7 +89,8 @@ public class AsyncDownloader {
                 throw new RuntimeException(e);
             }
             Map<String, String> headers = getHeaders();
-            Optional<String> response = HttpRequestHelper.getRequest(getUrl("/job/" + jobId + "/status"), headers);
+            String url = getUrl("/job/" + jobId + "/status");
+            Optional<String> response = HttpRequestHelper.getRequest(url, headers);
             if(response.isPresent()) {
                 Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.get()).get();
                 status = (String) responseMap.get("statusMessage");
@@ -97,6 +105,15 @@ public class AsyncDownloader {
         }
 
         logger.log(Level.INFO, "The job with id " + jobId + " finished correctly");
+    }
+
+    protected String downloadJobResult(String jobId) {
+        Map<String, String> headers = getHeaders();
+        String url = getUrl("/job/" + jobId + "/fetch");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        Path path = Path.of(tmpDir, jobId + ".csv.gz");
+        HttpRequestHelper.downloadToFile(url, headers, path);
+        return path.toString();
     }
 
     private String getToken() {
@@ -114,4 +131,5 @@ public class AsyncDownloader {
     private String getUrl(String apiPath) {
         return domain + "/clarity/v1/public" + apiPath;
     }
+
 }
