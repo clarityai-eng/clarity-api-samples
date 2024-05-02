@@ -55,6 +55,19 @@ public class HttpRequestHelper {
         return handleResponse(request);
     }
 
+    public static Optional<String> postRequest(String url, Map<String, String> headers, String jsonBody) {
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(url));
+        if(headers != null) {
+            requestBuilder = addHeaders(requestBuilder, headers);
+        }
+
+        HttpRequest request = requestBuilder
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        return handleResponse(request);
+    }
+
     private static HttpRequest.Builder addHeaders(HttpRequest.Builder requestBuilder, Map<String, String> headers) {
         for(String header: headers.keySet()) {
             requestBuilder.header(header,  headers.get(header));

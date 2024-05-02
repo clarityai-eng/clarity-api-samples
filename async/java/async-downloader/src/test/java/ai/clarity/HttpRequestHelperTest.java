@@ -9,10 +9,12 @@ import org.mockserver.model.Header;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.StringBody.exact;
 
 public class HttpRequestHelperTest {
 
@@ -56,7 +58,7 @@ public class HttpRequestHelperTest {
                 );
 
         String response = HttpRequestHelper.getRequest("http://localhost:1080/get-endpoint").get();
-        Assertions.assertFalse(response.isEmpty());
+        Assertions.assertEquals("<html>hello world</html>", response);
     }
 
     @Test
@@ -65,7 +67,7 @@ public class HttpRequestHelperTest {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/get-endpoint")
+                                .withPath("/get-endpoint-with-headers")
                                 .withHeader("Accept", "text/html")
                 )
                 .respond(
@@ -78,8 +80,48 @@ public class HttpRequestHelperTest {
                 );
 
         var headers = Map.of("Accept", "text/html");
-        String response = HttpRequestHelper.getRequest("http://localhost:1080/get-endpoint", headers).get();
-        Assertions.assertFalse(response.isEmpty());
+        String response = HttpRequestHelper.getRequest("http://localhost:1080/get-endpoint-with-headers", headers).get();
+        Assertions.assertEquals("<html>hello world with Headers</html>", response);
+    }
+
+    @Test
+    public void testSuccessfulPostRequest() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/post-endpoint")
+                                .withHeader("Content-type", "application/json")
+                                .withBody(exact("{\"param1\":\"value1\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("OK")
+                );
+
+        var headers = Map.of("Content-type", "application/json");
+        var jsonBody = HttpRequestHelper.mapToJson(Map.of("param1", "value1")).get();
+        String response = HttpRequestHelper.postRequest("http://localhost:1080/post-endpoint", headers, jsonBody).get();
+        Assertions.assertEquals("OK", response);
+    }
+
+    @Test
+    public void testRequestWithError() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/get-endpoint-with-error")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(401)
+                                .withBody("Not Authorized")
+                );
+
+        Optional<String> response = HttpRequestHelper.getRequest("http://localhost:1080/get-endpoint-with-error");
+        Assertions.assertTrue(response.isEmpty());
     }
 
 }
