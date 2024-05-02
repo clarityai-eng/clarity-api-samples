@@ -1,9 +1,18 @@
 plugins {
     id 'java'
+    id "application"
 }
 
 group = 'ai.clarity'
 version = '1.0-SNAPSHOT'
+
+ext {
+    javaMainClass = "ai.clarity.AsyncExamples"
+}
+
+application {
+    mainClassName = javaMainClass
+}
 
 repositories {
     mavenCentral()
