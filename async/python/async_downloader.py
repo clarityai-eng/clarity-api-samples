@@ -12,7 +12,6 @@ DOWNLOAD_FILE_CHUNK_SIZE = 8192
 
 class AsyncDownloader:
 
-    max_num_download_retries = 2
     token = None
 
     def __init__(self, key: str, secret: str, domain: str = "https://api.clarity.ai"):
@@ -106,19 +105,15 @@ class AsyncDownloader:
         local_filename = f"{job_id}.gz"
         return self._download_file(download_url, local_filename)
 
-    def _download_file(self, download_url: str, local_filename: str, num_retry: int = 1) -> str:
+    def _download_file(self, download_url: str, local_filename: str) -> str:
         logging.info(f"Downloading file from {download_url} to {local_filename}.")
 
         headers = self._get_headers()
 
         r = requests.get(download_url, headers=headers, stream=True)
         if r.status_code != 200:
-            if num_retry >= self.max_num_download_retries:
-                logger.error(f"Error getting job result: {r.status_code}")
-                raise RuntimeError(f"Error downloading job content: {r.status_code}")
-            else:
-                logger.info(f"Error getting job result: {r.status_code}. Retrying...")
-                return self._download_file(download_url, local_filename, ++num_retry)
+            logger.error(f"Error getting job result: {r.status_code}")
+            raise RuntimeError(f"Error downloading job content: {r.status_code}")
 
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=DOWNLOAD_FILE_CHUNK_SIZE):
