@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -82,6 +83,20 @@ public class HttpRequestHelper {
 
             if (response.statusCode() != 200) {
                 logger.log(Level.SEVERE, "Request finished with status Code: " + response.statusCode());
+
+                if(!response.body().isBlank()) {
+                    Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.body()).get();
+                    String errorMessage = "";
+                    if(responseMap.containsKey("message")){
+                        errorMessage = (String) responseMap.get("message");
+                    }
+                    if(responseMap.containsKey("elements")){
+                        Map errorMap = (Map) ((List) responseMap.get("elements")).get(0);
+                        errorMessage = (String) errorMap.get("message");
+                    }
+                    logger.log(Level.SEVERE, "Error requesting async job: " + errorMessage);
+                }
+
                 return Optional.empty();
             }
 
