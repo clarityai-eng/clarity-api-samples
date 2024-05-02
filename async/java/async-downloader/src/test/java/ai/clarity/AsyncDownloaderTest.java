@@ -120,4 +120,40 @@ public class AsyncDownloaderTest {
         AsyncDownloader asyncDownloader = new AsyncDownloader("http://localhost:1080", "MY_KEY", "MY_SECRET", 1);
         asyncDownloader.waitForJob("MY_JOB_ID");
     }
+
+    @Test
+    public void testWaitForJobUntilFail() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN"),
+                        Times.exactly(5)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(202)
+                                .withBody("{\"statusMessage\": \"RUNNING\"}")
+                );
+
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(422)
+                                .withBody("{\"statusMessage\": \"ERROR\"}")
+                );
+
+        AsyncDownloader asyncDownloader = new AsyncDownloader("http://localhost:1080", "MY_KEY", "MY_SECRET", 1);
+        Assertions.assertThrows(RuntimeException.class ,() -> asyncDownloader.waitForJob("MY_JOB_ID"));
+    }
+
 }
