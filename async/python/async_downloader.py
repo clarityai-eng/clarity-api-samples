@@ -19,7 +19,7 @@ class AsyncDownloader:
         self.domain = domain
         self.key = key
         self.secret = secret
-        self.token = None
+        self.token: str | None  = None
 
     def download(self, uri: str, body: dict) -> str:
         job_id = self._request_async(uri, body)
