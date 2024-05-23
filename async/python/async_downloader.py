@@ -17,7 +17,7 @@ class AsyncDownloader:
 
     DOWNLOAD_FILE_CHUNK_SIZE = 8192
 
-    def __init__(self, key: str, secret: str, domain: str = "https://api.dev.clarity.ai"):
+    def __init__(self, key: str, secret: str, domain: str = "https://api.clarity.ai"):
         self.domain = domain
         self.key = key
         self.secret = secret
