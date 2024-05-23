@@ -46,23 +46,24 @@ class AsyncDownloader:
 
         headers = self._get_headers()
 
-        response = requests.post(url, headers=headers, data=json.dumps(data)).json()
+        response = requests.post(url, headers=headers, json=data)
+        content = response.json()
 
-        if isinstance(response, dict) and "uuid" not in response:
-            uuid = response["uuid"]
+        if isinstance(content, dict) and "uuid" not in content:
+            uuid = content["uuid"]
             logger.info(f"Requested Job with UUID: {uuid}")
             return uuid
 
-        if not isinstance(response, dict):
-            logger.error(f"Error requesting async: {response}")
+        if not isinstance(content, dict):
+            logger.error(f"Error requesting async: {content}")
             raise RuntimeError("Error requesting async job")
 
         error_message = None
-        if "message" in response:
-            error_message = response["message"]
+        if "message" in content:
+            error_message = content["message"]
 
-        if "elements" in response:
-            error_message = response["elements"][0]["message"]
+        if "elements" in content:
+            error_message = content["elements"][0]["message"]
 
         logger.error(f"Error requesting async: {error_message}")
         raise RuntimeError("Error requesting async job")
@@ -79,13 +80,14 @@ class AsyncDownloader:
         logging.info(f"Requesting new token...")
         body = {"key": self.key, "secret": self.secret}
 
-        response = requests.post(f"{self.domain}/clarity/v1/oauth/token", json=body).json()
-        if self._success_login(response):
-            return response["token"]
+        response = requests.post(f"{self.domain}/clarity/v1/oauth/token", json=body)
+        content = response.json()
+        if self._success_login(content):
+            return content["token"]
 
-        error_message = response
-        if isinstance(response, dict):
-            error_message = response.get("status") or response["message"]
+        error_message = content
+        if isinstance(content, dict):
+            error_message = content.get("status") or content["message"]
 
         logger.error(f"Unable to get token: {error_message}")
         raise RuntimeError("Cannot get authentication token for Public API")
@@ -113,7 +115,8 @@ class AsyncDownloader:
         url = f"{self.domain}/clarity/v1/public/job/{job_id}/status"
         headers = self._get_headers()
         response = requests.get(url, headers=headers)
-        status = response.json()["statusMessage"]
+        content = response.json()
+        status = content["statusMessage"]
         return JobStatus(status)
 
     def _download_job_result(self, job_id: str) -> str:
