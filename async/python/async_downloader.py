@@ -137,7 +137,7 @@ class AsyncDownloader:
         if isinstance(content, dict):
             error_message = content.get("status") or content["message"]
             logger.error(f"Unable to get token: {error_message}")
-            raise RuntimeError("Cannot get authentication token for Public API")
+            raise RuntimeError(f"Cannot get authentication token for Public API: {error_message})")
 
         logger.error(f"Unable to get token: {content}")
-        raise RuntimeError("Cannot get authentication token for Public API")
+        raise RuntimeError(f"Cannot get authentication token for Public API: {content})")
