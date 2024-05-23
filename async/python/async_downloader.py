@@ -68,9 +68,7 @@ class AsyncDownloader:
         logging.info(f"Requesting new token...")
         body = {"key": self.key, "secret": self.secret}
 
-        response = requests.post(
-            self.domain + "/clarity/v1/oauth/token", json=body
-        ).json()
+        response = requests.post(self.domain + "/clarity/v1/oauth/token", json=body).json()
 
         if self._success_login(response):
             return response["token"]
@@ -98,12 +96,8 @@ class AsyncDownloader:
             logger.info(f"Async Job {job_id} finished successfully")
             return
 
-        logger.error(
-            "Finished with error: " + status_job_message + ". JobId: " + job_id
-        )
-        raise RuntimeError(
-            f"Async job {job_id} finished with error: {status_job_message}"
-        )
+        logger.error("Finished with error: " + status_job_message + ". JobId: " + job_id)
+        raise RuntimeError(f"Async job {job_id} finished with error: {status_job_message}")
 
     def _get_status(self, job_id: str) -> str:
         status_url = f"{self.domain}/clarity/v1/public/job/{job_id}/status"
@@ -126,13 +120,10 @@ class AsyncDownloader:
             raise RuntimeError(f"Error downloading job content: {response.status_code}")
 
         with open(local_filename, "wb") as file:
-            for chunk in response.iter_content(
-                chunk_size=self.DOWNLOAD_FILE_CHUNK_SIZE
-            ):
+            for chunk in response.iter_content(chunk_size=self.DOWNLOAD_FILE_CHUNK_SIZE):
                 file.write(chunk)
 
         logging.info(
-            f"Downloaded file from {download_url} to {local_filename}. "
-            f"File size {os.path.getsize(local_filename)}"
+            f"Downloaded file from {download_url} to {local_filename}. " f"File size {os.path.getsize(local_filename)}"
         )
         return local_filename
