@@ -7,9 +7,23 @@ import requests
 import time
 
 from http.client import OK
+from enum import Enum
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+class JobStatus(Enum):
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
+
+    @property
+    def is_running(self) -> bool:
+        return self == JobStatus.RUNNING
+
+    @property
+    def is_success(self) -> bool:
+        return self == JobStatus.SUCCESS
 
 
 class AsyncDownloader:
@@ -86,44 +100,45 @@ class AsyncDownloader:
 
     def _wait_for_job(self, job_id: str) -> None:
         logger.info(f"Waiting for Job {job_id} to finish...")
-        status_job_message = self._get_status(job_id)
+        job_status = self._get_status(job_id)
 
-        while status_job_message == "RUNNING":
+        while job_status.is_running:
             time.sleep(30)
-            status_job_message = self._get_status(job_id)
+            job_status = self._get_status(job_id)
 
-        if status_job_message == "SUCCESS":
+        if job_status.is_success:
             logger.info(f"Async Job {job_id} finished successfully")
             return
 
-        logger.error("Finished with error: " + status_job_message + ". JobId: " + job_id)
-        raise RuntimeError(f"Async job {job_id} finished with error: {status_job_message}")
+        logger.error(f"Finished with error: {job_status.value}. JobId: {job_id}")
+        raise RuntimeError(f"Async job {job_id} finished with error: {job_status.value}")
 
-    def _get_status(self, job_id: str) -> str:
+    def _get_status(self, job_id: str) -> JobStatus:
         status_url = f"{self.domain}/clarity/v1/public/job/{job_id}/status"
         headers = self._get_headers()
-        return requests.get(status_url, headers=headers).json()["statusMessage"]
+        status = requests.get(status_url, headers=headers).json()["statusMessage"]
+        return JobStatus(status)
 
     def _download_job_result(self, job_id: str) -> str:
         download_url = f"{self.domain}/clarity/v1/public/job/{job_id}/fetch"
         local_filename = os.path.join(tempfile.gettempdir(), f"{job_id}.csv.gz")
         return self._download_file(download_url, local_filename)
 
-    def _download_file(self, download_url: str, local_filename: str) -> str:
-        logging.info(f"Downloading file from {download_url} to {local_filename}.")
+    def _download_file(self, url: str, filename: str) -> str:
+        logging.info(f"Downloading file from {url} to {filename}.")
 
         headers = self._get_headers()
-        response = requests.get(download_url, headers=headers, stream=True)
+        response = requests.get(url, headers=headers, stream=True)
 
         if response.status_code != OK:
             logger.error(f"Error getting job result: {response.status_code}")
             raise RuntimeError(f"Error downloading job content: {response.status_code}")
 
-        with open(local_filename, "wb") as file:
+        with open(filename, "wb") as file:
             for chunk in response.iter_content(chunk_size=self.DOWNLOAD_FILE_CHUNK_SIZE):
                 file.write(chunk)
 
         logging.info(
-            f"Downloaded file from {download_url} to {local_filename}. " f"File size {os.path.getsize(local_filename)}"
+            f"Downloaded file from {url} to {filename}. " f"File size {os.path.getsize(filename)}"
         )
-        return local_filename
+        return filename
