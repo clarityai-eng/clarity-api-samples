@@ -4,9 +4,11 @@ from async_downloader import AsyncDownloader
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s,%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                    datefmt='%Y-%m-%dT%H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s,%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+)
 
 
 KEY = "YOUR_KEY_HERE"

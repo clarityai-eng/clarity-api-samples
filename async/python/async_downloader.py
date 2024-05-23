@@ -12,9 +12,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-
 class AsyncDownloader:
-
     DOWNLOAD_FILE_CHUNK_SIZE = 8192
 
     def __init__(self, key: str, secret: str, domain: str = "https://api.clarity.ai"):
@@ -37,7 +35,7 @@ class AsyncDownloader:
         response = requests.post(url, headers=headers, data=json.dumps(data)).json()
 
         if isinstance(response, dict) and "uuid" not in response:
-            requested_uuid = response['uuid']
+            requested_uuid = response["uuid"]
             logger.info(f"Requested Job with UUID: {requested_uuid}")
             return requested_uuid
 
@@ -47,10 +45,10 @@ class AsyncDownloader:
 
         error_message = None
         if "message" in response:
-            error_message = response['message']
+            error_message = response["message"]
 
         if "elements" in response:
-            error_message = response['elements'][0]['message']
+            error_message = response["elements"][0]["message"]
 
         logger.error(f"Error requesting async: {error_message}")
         raise RuntimeError("Error requesting async job")
@@ -58,7 +56,7 @@ class AsyncDownloader:
     def _get_headers(self) -> dict:
         return {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._get_token()}"
+            "Authorization": f"Bearer {self._get_token()}",
         }
 
     def _get_token(self) -> str:
@@ -68,19 +66,18 @@ class AsyncDownloader:
 
     def _request_new_token(self) -> str:
         logging.info(f"Requesting new token...")
-        body = {
-            "key": self.key,
-            "secret": self.secret
-        }
+        body = {"key": self.key, "secret": self.secret}
 
-        response = requests.post(self.domain + "/clarity/v1/oauth/token", json=body).json()
+        response = requests.post(
+            self.domain + "/clarity/v1/oauth/token", json=body
+        ).json()
 
         if self._success_login(response):
-            return response['token']
+            return response["token"]
 
         error_message = response
         if isinstance(response, dict):
-            error_message = response.get('status') or response['message']
+            error_message = response.get("status") or response["message"]
 
         logger.error(f"Unable to get token: {error_message}")
         raise RuntimeError("Cannot get authentication token for Public API")
@@ -101,13 +98,17 @@ class AsyncDownloader:
             logger.info(f"Async Job {job_id} finished successfully")
             return
 
-        logger.error("Finished with error: " + status_job_message + ". JobId: " + job_id)
-        raise RuntimeError(f"Async job {job_id} finished with error: {status_job_message}")
+        logger.error(
+            "Finished with error: " + status_job_message + ". JobId: " + job_id
+        )
+        raise RuntimeError(
+            f"Async job {job_id} finished with error: {status_job_message}"
+        )
 
     def _get_status(self, job_id: str) -> str:
         status_url = f"{self.domain}/clarity/v1/public/job/{job_id}/status"
         headers = self._get_headers()
-        return requests.get(status_url, headers=headers).json()['statusMessage']
+        return requests.get(status_url, headers=headers).json()["statusMessage"]
 
     def _download_job_result(self, job_id: str) -> str:
         download_url = f"{self.domain}/clarity/v1/public/job/{job_id}/fetch"
@@ -124,11 +125,14 @@ class AsyncDownloader:
             logger.error(f"Error getting job result: {response.status_code}")
             raise RuntimeError(f"Error downloading job content: {response.status_code}")
 
-        with open(local_filename, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=self.DOWNLOAD_FILE_CHUNK_SIZE):
+        with open(local_filename, "wb") as file:
+            for chunk in response.iter_content(
+                chunk_size=self.DOWNLOAD_FILE_CHUNK_SIZE
+            ):
                 file.write(chunk)
 
-        logging.info(f"Downloaded file from {download_url} to {local_filename}. "
-                     f"File size {os.path.getsize(local_filename)}")
+        logging.info(
+            f"Downloaded file from {download_url} to {local_filename}. "
+            f"File size {os.path.getsize(local_filename)}"
+        )
         return local_filename
-
