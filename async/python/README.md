@@ -17,7 +17,11 @@ You can check all available options in https://developer.clarity.ai/
 `pip install -r requirements.txt`
 
 ### Set your API credentials
-Go to `async_examples.py` file and set the KEY and SECRET constants to your own ClarityAI public API credentials
+Go to `async_examples.py` file and set the DEFAULT_KEY and DEFAULT_SECRET constants to your own 
+ClarityAI public API credentials.
+
+Or, if you prefer, use the environment variables CLARITY_AI_API_KEY and CLARITY_AI_API_SECRET to provide
+your Public API credentials.
 
 ### Run
 `python async_examples.py`

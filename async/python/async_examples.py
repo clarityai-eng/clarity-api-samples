@@ -1,4 +1,5 @@
 import logging
+import os
 
 from async_downloader import AsyncDownloader
 
@@ -10,9 +11,11 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 
+DEFAULT_KEY = "YOUR_KEY_HERE"
+DEFAULT_SECRET = "YOUR_SECRET_HERE"
 
-KEY = "YOUR_KEY_HERE"
-SECRET = "YOUR_SECRET_HERE"
+KEY = os.getenv("CLARITY_AI_API_KEY", default=DEFAULT_KEY)
+SECRET = os.getenv("CLARITY_AI_API_SECRET", default=DEFAULT_SECRET)
 
 async_downloader = AsyncDownloader(KEY, SECRET)
 
