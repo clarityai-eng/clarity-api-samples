@@ -14,7 +14,11 @@ You can check all available options in https://developer.clarity.ai/
 
 # How to run the examples
 ### Set your API credentials
-Go to `AsyncExamples` class and set the KEY and SECRET constants to your own ClarityAI public API credentials
+Go to `AsyncExamples` class and set the DEFAULT_KEY and DEFAULT_SECRET constants to your own 
+ClarityAI public API credentials.
+
+Or, if you prefer, use the environment variables CLARITY_AI_API_KEY and CLARITY_AI_API_SECRET to provide
+your Public API credentials.
 
 ### Run
 `./gradlew run`

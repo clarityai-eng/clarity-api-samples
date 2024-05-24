@@ -5,8 +5,11 @@ import java.util.Map;
 
 public class AsyncExamples {
 
-    private static final String KEY = "YOUR_KEY";
-    private static final String SECRET = "YOUR_SECRET";
+    private static final String DEFAULT_KEY = "YOUR_KEY";
+    private static final String DEFAULT_SECRET = "YOUR_SECRET";
+
+    private static final String KEY = System.getenv().getOrDefault("CLARITY_AI_API_KEY", DEFAULT_KEY);
+    private static final String SECRET = System.getenv().getOrDefault("CLARITY_AI_API_SECRET", DEFAULT_SECRET);
 
     public static void main(String[] args) {
 
