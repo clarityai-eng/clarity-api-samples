@@ -90,6 +90,16 @@ class AsyncDownloader:
         headers = self._headers()
         response = requests.get(url, headers=headers)
 
+        if response.status_code == 401:
+            # Token is expired. Request a new one
+            self.token = None
+            headers = self._headers()
+            response = requests.get(url, headers=headers)
+            # Now the response code must be 202, otherwise
+            # something else is wrong with the authentication
+            if response.status_code != 202:
+                raise RuntimeError("Couldn't renew the authentication token correctly")
+
         content = response.json()
         status = content["statusMessage"]
         return JobStatus(status)
