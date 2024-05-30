@@ -97,7 +97,7 @@ class AsyncDownloader:
             response = requests.get(url, headers=headers)
             # Now the response code must be 202, otherwise
             # something else is wrong with the authentication
-            if response.status_code != 202:
+            if response.status_code not in [202, 302]:
                 raise RuntimeError("Couldn't renew the authentication token correctly")
 
         content = response.json()
