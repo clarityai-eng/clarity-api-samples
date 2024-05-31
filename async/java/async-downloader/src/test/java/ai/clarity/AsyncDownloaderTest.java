@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
+import org.mockserver.model.HttpRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -101,13 +102,7 @@ public class AsyncDownloaderTest {
                 );
 
         mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
-                                .withHeader("Content-Type", "application/json")
-                                .withHeader("Authorization", "Bearer THE_TOKEN")
-                )
+                .when(getGetStatusRequest())
                 .respond(
                         response()
                                 .withStatusCode(302)
@@ -136,13 +131,7 @@ public class AsyncDownloaderTest {
                 );
 
         mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
-                                .withHeader("Content-Type", "application/json")
-                                .withHeader("Authorization", "Bearer THE_TOKEN")
-                )
+                .when(getGetStatusRequest())
                 .respond(
                         response()
                                 .withStatusCode(422)
@@ -151,6 +140,70 @@ public class AsyncDownloaderTest {
 
         AsyncDownloader asyncDownloader = new AsyncDownloader("http://localhost:1080", "MY_KEY", "MY_SECRET", 1);
         Assertions.assertThrows(RuntimeException.class ,() -> asyncDownloader.waitForJob("MY_JOB_ID"));
+    }
+
+    @Test
+    public void testWaitForJobRenewingToken() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN"),
+                        Times.exactly(3)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(202)
+                                .withBody("{\"statusMessage\": \"RUNNING\"}")
+                );
+
+        mockServer
+                .when(request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN"),
+                        Times.exactly(1))
+                .respond(
+                        response()
+                                .withStatusCode(401)
+                                .withBody("{\"code\": \"1000\", \"message\": \"Invalid authentication token or expired\"}")
+                );
+
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Authorization", "Bearer THE_TOKEN"),
+                        Times.exactly(2)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(202)
+                                .withBody("{\"statusMessage\": \"RUNNING\"}")
+                );
+        mockServer
+                .when(getGetStatusRequest())
+                .respond(
+                        response()
+                                .withStatusCode(302)
+                                .withBody("{\"statusMessage\": \"SUCCESS\"}")
+                );
+
+        AsyncDownloader asyncDownloader = new AsyncDownloader("http://localhost:1080", "MY_KEY", "MY_SECRET", 1);
+        asyncDownloader.waitForJob("MY_JOB_ID");
+    }
+
+    private HttpRequest getGetStatusRequest() {
+        return request()
+                .withMethod("GET")
+                .withPath("/clarity/v1/public/job/MY_JOB_ID/status")
+                .withHeader("Content-Type", "application/json")
+                .withHeader("Authorization", "Bearer THE_TOKEN");
     }
 
 }

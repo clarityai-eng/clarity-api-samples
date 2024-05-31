@@ -92,11 +92,19 @@ public class AsyncDownloader {
             String url = getUrl("/job/" + jobId + "/status");
             Optional<String> response = HttpRequestHelper.getRequest(url, headers);
             if(response.isPresent()) {
-                Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(response.get()).get();
-                status = (String) responseMap.get("statusMessage");
+                status = getJobStatusFromResponse(response.get());
             }
             else {
-                throw new RuntimeException("Error requesting the status of the job " + jobId);
+                // It's possible that the token has expired. Try again renewing the token before failing definitively
+                this.token = null;
+                headers = getHeaders();
+                Optional<String> responseWithNewToken = HttpRequestHelper.getRequest(url, headers);
+                if(responseWithNewToken.isPresent()) {
+                    status = getJobStatusFromResponse(responseWithNewToken.get());
+                }
+                else {
+                    throw new RuntimeException("Error requesting the status of the job " + jobId);
+                }
             }
         }
 
@@ -105,6 +113,11 @@ public class AsyncDownloader {
         }
 
         logger.log(Level.INFO, "The job with id " + jobId + " finished correctly");
+    }
+
+    private String getJobStatusFromResponse(String responseString) {
+        Map<String, Object> responseMap = HttpRequestHelper.jsonToMap(responseString).get();
+        return (String) responseMap.get("statusMessage");
     }
 
     protected String downloadJobResult(String jobId) {
