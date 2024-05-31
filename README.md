@@ -2,7 +2,7 @@
 
 ## What is this repo?
 Here you may find some helpers and code snippets that will help you while 
-developing code that consumes the REST services offered by Clarity AI through our (Public API)[https://developer.clarity.ai/].
+developing code that consumes the REST services offered by Clarity AI through our [Public API](https://developer.clarity.ai/).
 
 Our intention is to share this code with all developers out there that need to make an integration with our services, so 
 they can easily and smoothly create applications that consume our sustainability data.
